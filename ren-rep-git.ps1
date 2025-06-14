@@ -29,7 +29,7 @@ if (-not (Test-Path -Path $directory)) {
 }
 
 # Function to replace content in files
-function Replace-FileContent {
+function Update-FileContent {
     param($filePath)
     
     # Skip binary files and git files
@@ -58,15 +58,19 @@ function Rename-GitItem {
         $newPath = Join-Path $parent $newName
         
         # Use git mv for renaming
+        $directory = Split-Path -Path $newPath -Parent
+        Push-Location $directory
+
         $gitCommand = "git mv `"$path`" `"$newPath`""
-        Write-Host "Executing: $gitCommand"
         Invoke-Expression $gitCommand
+
+        Pop-Location
     }
 }
 
 # Process all files first (content replacement)
 Get-ChildItem -Path $directory -Recurse -File | ForEach-Object {
-    Replace-FileContent $_.FullName
+    Update-FileContent $_.FullName
 }
 
 # Process files for renaming (bottom-up to handle nested paths)
